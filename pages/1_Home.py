@@ -2,7 +2,7 @@ import streamlit as st
 from PIL import Image
 
 # Optional: Set background or logo
-st.image("trekonomix_logo.png", use_column_width=True)
+# st.image("trekonomix_logo.png", use_column_width=True)  # Removed logo
 
 st.title("Plan Your Perfect Trip with Trekonomix 🧳")
 
