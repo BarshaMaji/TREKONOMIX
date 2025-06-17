@@ -3,10 +3,9 @@ import pandas as pd
 df = pd.read_csv("dataset.csv")
 df.drop(columns=["trip_id", "Unnamed: 0"], errors="ignore", inplace=True)
 
-def get_recommendations(location, days, budget, max_results=5):
+def get_recommendations(location, budget, max_results=5):
     filtered = df[
         (df['location'].str.lower() == location.lower()) &
-        #(abs(df['no_of_days'] - days) <= 1) &   # 🚫 Commented out
         (df['total_budget_on_season_INR'] <= budget)
     ]
     if filtered.empty:
