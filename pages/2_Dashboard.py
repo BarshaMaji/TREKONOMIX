@@ -5,13 +5,14 @@ from geopy.geocoders import Nominatim
 import folium
 from streamlit_folium import st_folium
 
-st.title("Recommended Trips")
+st.title("Recommended Trips Based on Your Budget")
 
 if "search_params" not in st.session_state:
     st.error("Please go to the Home page and enter your trip details.")
     st.stop()
 
 params = st.session_state.search_params
+
 results = get_recommendations(params["location"], params["days"], params["budget"])
 
 if results is None:
@@ -23,7 +24,7 @@ kolkata = (22.5726, 88.3639)
 
 for i, trip in enumerate(results, 1):
     st.subheader(f"Option {i}: {trip['location']}")
-    st.write(f"Trip Duration: {trip['no_of_days']} days")
+    st.write(f"Trip Duration: {params['days']} days")
     st.write(f"Number of Persons: {trip['no_of_persons']}")
     st.write(f"Travel Purpose: {trip['travel_purpose']}")
     st.write(f"Accommodation Type: {trip['accommodation_type']}")
@@ -54,10 +55,9 @@ for i, trip in enumerate(results, 1):
 
     map_center = [(kolkata[0] + dest_coords[0]) / 2, (kolkata[1] + dest_coords[1]) / 2]
     m = folium.Map(location=map_center, zoom_start=5)
-
     folium.Marker(kolkata, tooltip="Kolkata", icon=folium.Icon(color="blue")).add_to(m)
     folium.Marker(dest_coords, tooltip=trip["location"], icon=folium.Icon(color="red")).add_to(m)
     folium.PolyLine([kolkata, dest_coords], color="green").add_to(m)
-
     st_folium(m, height=400, width=700)
+
     st.markdown("---")
