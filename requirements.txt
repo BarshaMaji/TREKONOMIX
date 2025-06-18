@@ -1,5 +1,6 @@
 streamlit
+scikit-learn
 pandas
 folium
-geopy
 streamlit-folium
+geopy
