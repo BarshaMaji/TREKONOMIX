@@ -1,0 +1,14 @@
+body {
+    background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e'); /* Beachy travel theme */
+    background-size: cover;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-position: center;
+    color: white;
+}
+
+.stApp {
+    background-color: rgba(0, 0, 0, 0.5); /* Adds semi-transparent overlay for readability */
+    padding: 20px;
+    border-radius: 10px;
+}
