@@ -1,29 +1,32 @@
 import pandas as pd
 import pickle
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
-from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
 
 df = pd.read_csv("trekonomix_dataset.csv")
 
-label_cols = ['location', 'currency', 'month', 'accommodation_type',
-              'travel_purpose', 'traveler_type', 'tags', 'transport_options']
+# Encode categorical columns
+label_cols = df.select_dtypes(include=['object']).columns.tolist()
 encoders = {}
 for col in label_cols:
     le = LabelEncoder()
     df[col] = le.fit_transform(df[col].astype(str).str.lower())
     encoders[col] = le
 
+# Features and label
+X = df.drop(columns=["total_budget_on_season_INR"])
+y = df["total_budget_on_season_INR"]
+
+# Scale numeric columns
+num_cols = X.select_dtypes(include=["int64", "float64"]).columns.tolist()
 scaler = MinMaxScaler()
-df[['average_days']] = scaler.fit_transform(df[['average_days']])
+X[num_cols] = scaler.fit_transform(X[num_cols])
 
-X = df[label_cols + ['average_days']]
-y = df['total_budget_on_season_INR']
-
-model = LinearRegression()
+# Train model
+model = RandomForestRegressor(n_estimators=100, random_state=42)
 model.fit(X, y)
 
-pickle.dump(model, open("ml_model.pkl", "wb"))
+# Save everything
+pickle.dump(model, open("rf_model.pkl", "wb"))
 pickle.dump(encoders, open("encoders.pkl", "wb"))
 pickle.dump(scaler, open("scaler.pkl", "wb"))
-
-print("✅ ML model trained and saved.")
