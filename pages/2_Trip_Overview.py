@@ -1,25 +1,29 @@
 import streamlit as st
+from pathlib import Path
 from ai_helper import predict_cost
 from maps_helper import generate_map
+from web_image_helper import fetch_web_images
 from streamlit_folium import st_folium
-import requests
+
+# Inject background CSS
+st.markdown(Path("background_style.css").read_text(), unsafe_allow_html=True)
 
 st.title("🧳 Trip Overview")
 
-user_input = st.session_state.get("user_input", None)
-
-if user_input:
+if "trip_data" in st.session_state:
+    user_input = st.session_state.trip_data
+    destination = user_input["destination"]
     cost = predict_cost(user_input)
-    st.success(f"Predicted Trip Cost: ₹{cost}")
 
-    st.markdown("### 🌐 Destination Map")
-    m = generate_map(user_input['location'])
-    st_folium(m, width=700)
+    st.success(f"Estimated Trip Cost: ₹{cost}")
 
-    # Web images
-    st.markdown("### 📸 Destination Images")
-    query = user_input["location"]
-    url = f"https://source.unsplash.com/800x400/?{query},travel"
-    st.image(url, use_column_width=True)
+    st.markdown("### Destination Map:")
+    map_object = generate_map(destination)
+    st_folium(map_object, width=700)
+
+    st.markdown("### Explore Photos:")
+    images = fetch_web_images(destination)
+    for img in images:
+        st.image(img, use_column_width=True)
 else:
-    st.warning("Please enter your trip details on the Home page.")
+    st.warning("No trip data found. Please go back to the home page.")

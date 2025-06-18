@@ -1,43 +1,39 @@
 import pandas as pd
-import pickle
+import numpy as np
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
-from sklearn.neural_network import MLPRegressor
+from sklearn.linear_model import LinearRegression
+import pickle
 
-# Load the dataset
+# Load dataset
 df = pd.read_csv("trekonomix_dataset.csv")
 
-# Define columns to encode and scale
-label_cols = ['location', 'currency', 'month', 'accommodation_type', 
-              'travel_purpose', 'traveler_type', 'tags', 'transport_options']
-numeric_cols = ['average_days']
+# Lowercase relevant categorical columns
+categorical_cols = ['destination', 'season', 'transport_type', 'accommodation_type', 'activity_type']
+for col in categorical_cols:
+    df[col] = df[col].astype(str).str.lower()
 
-# Store encoders for later use
+# Label Encode
 encoders = {}
-for col in label_cols:
+for col in categorical_cols:
     le = LabelEncoder()
-    df[col] = le.fit_transform(df[col].astype(str))
+    df[col] = le.fit_transform(df[col])
     encoders[col] = le
 
-# Normalize numeric columns
+# Scale numeric
 scaler = MinMaxScaler()
-df[numeric_cols] = scaler.fit_transform(df[numeric_cols])
+df[['days', 'avg_daily_cost']] = scaler.fit_transform(df[['days', 'avg_daily_cost']])
 
-# Define features (X) and target (y)
-X = df[label_cols + numeric_cols]
-y = df['total_budget_on_season_INR']  # You can change to 'total_budget_off_season_INR' if needed
+# Train model
+X = df.drop(columns=['total_cost'])
+y = df['total_cost']
 
-# Train the model
-model = MLPRegressor(hidden_layer_sizes=(64, 64), activation='relu', max_iter=500, random_state=42)
+model = LinearRegression()
 model.fit(X, y)
 
-# Save the model, encoders, and scaler
-with open("ml_model.pkl", "wb") as f:
-    pickle.dump(model, f)
-
+# Save everything
 with open("encoders.pkl", "wb") as f:
     pickle.dump(encoders, f)
-
 with open("scaler.pkl", "wb") as f:
     pickle.dump(scaler, f)
-
-print("✅ Model training complete. All files saved without modifying dataset.")
+with open("cnn_model.h5", "wb") as f:
+    pickle.dump(model, f)

@@ -1,42 +1,29 @@
-import pandas as pd
+import numpy as np
 import pickle
+import pandas as pd
 
-# Load model and preprocessors
-model = pickle.load(open("ml_model.pkl", "rb"))
+# Load model and tools
+model = pickle.load(open("cnn_model.h5", "rb"))
 encoders = pickle.load(open("encoders.pkl", "rb"))
 scaler = pickle.load(open("scaler.pkl", "rb"))
 
-# Define column lists used in the model
-label_cols = ['location', 'currency', 'month', 'accommodation_type', 
-              'travel_purpose', 'traveler_type', 'tags', 'transport_options']
-numeric_cols = ['average_days']
+def safe_encode(col_name, value):
+    encoder = encoders[col_name]
+    classes = encoder.classes_.tolist()
+    value = value.lower()
+    if value in classes:
+        return encoder.transform([value])[0]
+    else:
+        # Add fallback to first class or unknown label
+        return 0
 
 def predict_cost(user_input):
-    """
-    user_input: dict with keys matching required features
-    Example:
-    {
-        'location': 'Paris',
-        'currency': 'EUR',
-        'month': 'June',
-        'accommodation_type': 'Hotel',
-        'travel_purpose': 'Vacation',
-        'traveler_type': 'Family',
-        'tags': 'Cultural',
-        'transport_options': 'Flight',
-        'average_days': 5
-    }
-    """
-
+    # Preprocess
     df = pd.DataFrame([user_input])
-
-    # Encode categorical features
-    for col in label_cols:
-        df[col] = encoders[col].transform(df[col].astype(str))
-
-    # Scale numeric features
-    df[numeric_cols] = scaler.transform(df[numeric_cols])
-
-    # Predict total cost
-    prediction = model.predict(df)[0]
-    return round(prediction, 2)
+    for col in encoders:
+        df[col] = [safe_encode(col, df[col].values[0])]
+    
+    df[['days', 'avg_daily_cost']] = scaler.transform(df[['days', 'avg_daily_cost']])
+    
+    pred = model.predict(df)[0]
+    return round(pred, 2)
