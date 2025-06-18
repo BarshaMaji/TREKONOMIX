@@ -1,82 +1,32 @@
 import streamlit as st
-import streamlit.components.v1 as components
 
-st.set_page_config(page_title="Trekonomix - Plan Your Trip", layout="centered")
+st.title("🏠 Plan Your Trip")
 
-# 🎨 Custom Styled Background
-page_bg = """
-<style>
-body {
-  background-image: url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e");
-  background-size: cover;
-  background-attachment: fixed;
-}
+with st.form("user_input_form"):
+    destination = st.text_input("Destination")
+    currency = st.selectbox("Currency", ["INR", "USD", "EUR", "YEN"])
+    month = st.selectbox("Month", ["January", "February", "March", "April", "May", "June", 
+                                   "July", "August", "September", "October", "November", "December"])
+    accommodation_type = st.selectbox("Accommodation Type", ["Hotel", "Hostel", "Resort", "Apartment"])
+    travel_purpose = st.selectbox("Travel Purpose", ["Business", "Vacation", "Backpacking", "Cultural"])
+    traveler_type = st.selectbox("Traveler Type", ["Solo", "Couple", "Family", "Group"])
+    tags = st.selectbox("Trip Tag", ["Adventure", "Luxury", "Budget", "Cultural"])
+    transport_options = st.selectbox("Transport Option", ["Flight", "Train", "Bus"])
+    average_days = st.number_input("Number of Days", 1, 30, 5)
 
-h1, h2, h3 {
-  color: white !important;
-  text-shadow: 2px 2px 4px #000;
-  text-align: center;
-}
-
-.stApp {
-  background-color: rgba(0, 0, 0, 0.4);
-  padding: 2rem;
-  border-radius: 10px;
-  color: white;
-}
-
-div.stButton > button {
-  background-color: #FFA500;
-  color: black;
-  font-weight: bold;
-  border-radius: 10px;
-  padding: 0.5em 2em;
-  transition: 0.3s;
-}
-
-div.stButton > button:hover {
-  background-color: #FFD700;
-  color: #000;
-}
-
-.stTextInput > div > input {
-  background-color: rgba(255,255,255,0.9);
-  color: black;
-  font-weight: bold;
-}
-
-.stSlider > div > div {
-  background-color: rgba(255,255,255,0.7);
-}
-</style>
-"""
-st.markdown(page_bg, unsafe_allow_html=True)
-
-# 🧡 Title and Image
-st.markdown("<h1>🌍 Trekonomix</h1>", unsafe_allow_html=True)
-st.image("https://source.unsplash.com/1200x400/?travel,explore,nature", use_column_width=True)
-
-# 🧾 Form
-st.markdown("### 💡 Tell us about your dream trip:")
-with st.form("trip_form"):
-    destination = st.text_input("📍 Destination")
-    days = st.slider("🗓️ Duration (days)", 1, 30, 5)
-    budget = st.number_input("💰 Budget (INR)", min_value=1000, step=500, value=20000)
-    submitted = st.form_submit_button("🔍 Search")
+    submitted = st.form_submit_button("Get Trip Overview")
 
 if submitted:
-    st.session_state["destination"] = destination
-    st.session_state["days"] = days
-    st.session_state["budget"] = budget
-
-    st.success("Planning your trip... Hang tight! 🚀")
-    components.html(
-        """
-        <script>
-            setTimeout(function() {
-                window.location.href = '/Trekonomix/pages/2_Trip_Overview';
-            }, 1500);
-        </script>
-        """,
-        height=0
-    )
+    st.session_state.user_input = {
+        "location": destination,
+        "currency": currency,
+        "month": month,
+        "accommodation_type": accommodation_type,
+        "travel_purpose": travel_purpose,
+        "traveler_type": traveler_type,
+        "tags": tags,
+        "transport_options": transport_options,
+        "average_days": average_days
+    }
+    st.success("Redirecting to Trip Overview...")
+    st.switch_page("pages/2_Trip_Overview.py")

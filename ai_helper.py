@@ -1,24 +1,42 @@
 import pandas as pd
 import pickle
 
-model_on = pickle.load(open("model_on.pkl", "rb"))
-model_off = pickle.load(open("model_off.pkl", "rb"))
+# Load model and preprocessors
+model = pickle.load(open("ml_model.pkl", "rb"))
 encoders = pickle.load(open("encoders.pkl", "rb"))
 scaler = pickle.load(open("scaler.pkl", "rb"))
 
-def predict_budget(user_input):
+# Define column lists used in the model
+label_cols = ['location', 'currency', 'month', 'accommodation_type', 
+              'travel_purpose', 'traveler_type', 'tags', 'transport_options']
+numeric_cols = ['average_days']
+
+def predict_cost(user_input):
+    """
+    user_input: dict with keys matching required features
+    Example:
+    {
+        'location': 'Paris',
+        'currency': 'EUR',
+        'month': 'June',
+        'accommodation_type': 'Hotel',
+        'travel_purpose': 'Vacation',
+        'traveler_type': 'Family',
+        'tags': 'Cultural',
+        'transport_options': 'Flight',
+        'average_days': 5
+    }
+    """
+
     df = pd.DataFrame([user_input])
-    
-    for col in encoders:
-        df[col] = encoders[col].transform(df[col])
 
-    df[['average_days', 'extra_expenses_INR']] = scaler.transform(
-        df[['average_days', 'extra_expenses_INR']]
-    )
+    # Encode categorical features
+    for col in label_cols:
+        df[col] = encoders[col].transform(df[col].astype(str))
 
-    if user_input['season'] == 'On-season':
-        prediction = model_on.predict(df)[0]
-    else:
-        prediction = model_off.predict(df)[0]
-    
+    # Scale numeric features
+    df[numeric_cols] = scaler.transform(df[numeric_cols])
+
+    # Predict total cost
+    prediction = model.predict(df)[0]
     return round(prediction, 2)
