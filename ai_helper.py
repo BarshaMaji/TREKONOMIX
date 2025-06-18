@@ -1,31 +1,24 @@
-# ai_helper.py
-
-import pickle
 import pandas as pd
+import pickle
 
-# Load the saved model
-with open("rf_model.pkl", "rb") as f:
-    model = pickle.load(f)
+model_on = pickle.load(open("model_on.pkl", "rb"))
+model_off = pickle.load(open("model_off.pkl", "rb"))
+encoders = pickle.load(open("encoders.pkl", "rb"))
+scaler = pickle.load(open("scaler.pkl", "rb"))
 
-# Load encoders and scaler
-with open("encoders.pkl", "rb") as f:
-    encoders = pickle.load(f)
-
-with open("scaler.pkl", "rb") as f:
-    scaler = pickle.load(f)
-
-def predict_cost(user_input):
+def predict_budget(user_input):
     df = pd.DataFrame([user_input])
-
-    # Encode categorical columns
+    
     for col in encoders:
-        if col in df.columns:
-            df[col] = encoders[col].transform(df[col].str.lower())
+        df[col] = encoders[col].transform(df[col])
 
-    # Normalize numeric columns
-    if 'days' in df.columns and 'avg_daily_cost' in df.columns:
-        df[['days', 'avg_daily_cost']] = scaler.transform(df[['days', 'avg_daily_cost']])
+    df[['average_days', 'extra_expenses_INR']] = scaler.transform(
+        df[['average_days', 'extra_expenses_INR']]
+    )
 
-    # Predict
-    prediction = model.predict(df)[0]
+    if user_input['season'] == 'On-season':
+        prediction = model_on.predict(df)[0]
+    else:
+        prediction = model_off.predict(df)[0]
+    
     return round(prediction, 2)

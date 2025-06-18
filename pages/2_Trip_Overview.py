@@ -1,22 +1,35 @@
 import streamlit as st
-from ai_helper import predict_cost
-from maps_helper import generate_map
-from web_image_helper import fetch_web_images
 from streamlit_folium import st_folium
+from ai_helper import predict_budget
+from maps_helper import generate_map
 
+st.title("📍 Plan Your Trip with Trekonomix")
 
-st.title("🧳 Trip Overview")
+with st.form("trip_form"):
+    location = st.text_input("Destination", value="Goa")
+    season = st.selectbox("Season", ["On-season", "Off-season"])
+    stay = st.selectbox("Accommodation", ["Hotel", "Hostel", "Homestay"])
+    purpose = st.selectbox("Purpose", ["Leisure", "Business", "Pilgrimage", "Adventure"])
+    traveler = st.selectbox("Traveler Type", ["Solo", "Couple", "Family", "Group"])
+    transport = st.selectbox("Transport Mode", ["Flight", "Train", "Bus", "Cab"])
+    days = st.number_input("Average Days", min_value=1, value=5)
+    extra = st.number_input("Estimated Extra Expenses (INR)", value=1000)
 
-ui = st.session_state.get("user_input")
-if ui:
-    cost = predict_cost(ui)
-    st.success(f"✅ Estimated Trip Cost: ₹{cost}")
+    submitted = st.form_submit_button("Calculate Budget")
 
-    st.markdown("### Map")
-    st_folium(generate_map(ui["location"]), width=700)
+if submitted:
+    user_input = {
+        "location": location,
+        "season": season,
+        "accommodation_type": stay,
+        "travel_purpose": purpose,
+        "traveler_type": traveler,
+        "transport_options": transport,
+        "average_days": days,
+        "extra_expenses_INR": extra
+    }
 
-    st.markdown("### Photos")
-    for img in fetch_web_images(ui["location"]):
-        st.image(img, use_column_width=True)
-else:
-    st.warning("Go to the homepage to enter trip details.")
+    budget = predict_budget(user_input)
+    st.success(f"🎯 Predicted {season} Budget: ₹{budget}")
+    st.markdown("### 🗺️ Trip Map")
+    st_folium(generate_map(location), width=700)
