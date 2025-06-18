@@ -1,7 +1,5 @@
 body {
     background-image: url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e");
     background-size: cover;
-    background-repeat: no-repeat;
     background-attachment: fixed;
-    color: rgb(161, 211, 173);
 }
